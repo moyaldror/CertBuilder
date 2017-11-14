@@ -1,0 +1,2 @@
+VERSION = "1.0.0"
+OPENSSL_TIME_FORMAT = "%y%m%d%H%M%SZ"
