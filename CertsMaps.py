@@ -14,11 +14,11 @@ HASH_ALG_MAP = {
     name: cls for name, cls in hashes.__dict__.items()
     if isinstance(cls, type) and issubclass(cls, hashes.HashAlgorithm) and cls is not hashes.HashAlgorithm
 }
+
 EC_CURVE_MAP = {
     name: cls for name, cls in ec.__dict__.items()
     if isinstance(cls, type) and issubclass(cls, ec.EllipticCurve) and cls is not ec.EllipticCurve
 }
-
 
 ATTR_TO_X509_OBJ = {
     'subjName': x509.Name,
