@@ -29,8 +29,8 @@ Default is *0*.
 --depth
 ```
 
-Set the number of CA branchaes to create. Use it when you want your root CA to create number
-of intermediate CAs that each of them will have thier own chain. Note: this flag has no affect 
+Set the number of CA branches to create. Use it when you want your root CA to create number
+of intermediate CAs that each of them will have their own chain. Note: this flag has no affect
 if the --depth is set to 0.
 Default is 1.
 ```
@@ -49,16 +49,16 @@ Default is *1*.
 --certs
 ```
 
-Set the number of certificates to revoke out of the end entitt certificates created per chain.
+Set the number of certificates to revoke out of the end entity certificates created per chain.
 When using this flag, the script will also create CRL file, index.txt file (used with openssl ocsp)
-and a file with openssl ocsp command that runs a small ocsp server localy.
+and a file with openssl ocsp command that runs a small ocsp server locally.
 Default is *0*.
 ```
 --revoked
 ```
 
 Set the number of days the certificates will be valid for. The value can be negative which will set the
-notBefore to be X days before today and notAfter to current time. Use negative value when you whish to 
+notBefore to be X days before today and notAfter to current time. Use negative value when you wish to
 create expired certificates.
 **Default** is *3650* (10 Years).
 ```
