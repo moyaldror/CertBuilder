@@ -3,18 +3,15 @@ import os
 from CertsMaps import ENCODING_TYPES
 
 CERTS_DEFAULTS_CONFIG_FILE = 'certs_defaults.cnf'
-CERTS_DEFAULTS = 'cert_defaults', 0
-ROOT_CA_CERTS_DEFAULTS = 'root_ca_cert_defaults', 1
-INTERMEDIATE_CA_CERTS_DEFAULTS = 'interm_ca_cert_defaults', 2
 
-cert_defaults = {
+certs_defaults = {
     'subjName': {
-        'Country': u'IL',
-        'State': u'TLV',
-        'Organization': u'Radware',
-        'OrganizationUnit': u'Appxcel',
+        'CountryName': u'IL',
+        'StateOrProvinceName': u'TLV',
+        'OrganizationName': u'Radware',
+        'OrganizationalUnitName': u'Appxcel',
         'CommonName': u'TestCert',
-        'E-Mail': u'drorm@radware.com',
+        'EmailAddress': u'drorm@radware.com',
     },
     'altSubjName': {
         'altDNS.0': u'alt.Test',
@@ -25,11 +22,10 @@ cert_defaults = {
         'path_length': None
     }
 }
-
-root_ca_cert_defaults = {
-    **cert_defaults,
+root_ca_certs_defaults = {
+    **certs_defaults,
     'subjName': {
-        **cert_defaults['subjName'],
+        **certs_defaults['subjName'],
         'CommonName': u'TestRootCert',
     },
     'basicConstraints': {
@@ -37,27 +33,23 @@ root_ca_cert_defaults = {
         'path_length': 0
     }
 }
-
-interm_cert_defaults = {
-    **root_ca_cert_defaults,
+interm_certs_defaults = {
+    **root_ca_certs_defaults,
     'subjName': {
-        **cert_defaults['subjName'],
+        **certs_defaults['subjName'],
         'CommonName': u'TestIntermCert',
     },
 }
+
+default_cert_param_names = ['certs_defaults', 'root_ca_certs_defaults', 'interm_certs_defaults']
+default_cert_params = [certs_defaults, root_ca_certs_defaults, interm_certs_defaults]
+config = {name: obj for name, obj in zip(default_cert_param_names, default_cert_params)}
 
 
 def write_cert_defaults_to_file():
     try:
         with open(CERTS_DEFAULTS_CONFIG_FILE, 'w') as defaults_file:
-            json.dump(
-                {
-                    'config': [
-                        {CERTS_DEFAULTS[0]: cert_defaults},
-                        {ROOT_CA_CERTS_DEFAULTS[0]: root_ca_cert_defaults},
-                        {INTERMEDIATE_CA_CERTS_DEFAULTS[0]: interm_cert_defaults}
-                    ]
-                }, defaults_file, indent=2)
+            json.dump({'config': config}, defaults_file, indent=2)
     except Exception as e:
         print("Failed to write default certificate parameters to file with error: {}".format(e))
 
@@ -67,30 +59,28 @@ def load_cert_defaults_from_file():
         with open(CERTS_DEFAULTS_CONFIG_FILE) as defaults_file:
             data = json.load(defaults_file)
 
-        return {
-            CERTS_DEFAULTS[0]:
-                data['config'][CERTS_DEFAULTS[1]][CERTS_DEFAULTS[0]],
-            ROOT_CA_CERTS_DEFAULTS[0]:
-                data['config'][ROOT_CA_CERTS_DEFAULTS[1]][ROOT_CA_CERTS_DEFAULTS[0]],
-            INTERMEDIATE_CA_CERTS_DEFAULTS[0]:
-                data['config'][INTERMEDIATE_CA_CERTS_DEFAULTS[1]][INTERMEDIATE_CA_CERTS_DEFAULTS[0]],
-        }
+        return data['config']
+
     except Exception as e:
         print("Failed to open default file with error: {}.{}"
               "Using hard coded default values".format(e, os.linesep))
         write_cert_defaults_to_file()
-        return {
-            CERTS_DEFAULTS[0]: cert_defaults,
-            ROOT_CA_CERTS_DEFAULTS[0]: root_ca_cert_defaults,
-            INTERMEDIATE_CA_CERTS_DEFAULTS[0]: interm_cert_defaults,
-        }
+        return config
 
 
-class CertsDefaults(object):
+# decorator to set the class attributes
+def set_certs_defaults(cls):
     defaults = load_cert_defaults_from_file()
-    CERTS_DEFAULTS = defaults[CERTS_DEFAULTS[0]]
-    ROOT_CA_CERTS_DEFAULTS = defaults[ROOT_CA_CERTS_DEFAULTS[0]]
-    INTERMEDIATE_CA_CERTS_DEFAULTS = defaults[INTERMEDIATE_CA_CERTS_DEFAULTS[0]]
+
+    for defaults_name in default_cert_param_names:
+        setattr(cls, defaults_name.upper(), defaults[defaults_name])
+
+    return cls
+
+
+@set_certs_defaults
+class CertsDefaults(object):
+    pass
 
 
 class Decorators(object):

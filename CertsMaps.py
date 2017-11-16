@@ -20,18 +20,11 @@ EC_CURVE_MAP = {
 }
 
 
-# This is a list of tuples because NameOID can't be a key in
-# a dictionary
-OID_TO_RN = [
-    (NameOID.__dict__[oid], underscore_to_camel_case(oid)) for oid in NameOID.__dict__ if not oid.startswith('__')
-]
-
 ATTR_TO_X509_OBJ = {
     'subjName': x509.Name,
     'altSubjName': x509.SubjectAlternativeName,
     'basicConstraints': x509.BasicConstraints,
 }
-
 
 ATTR_TO_X509_ATTR = {
     'name': x509.NameAttribute,
@@ -39,14 +32,14 @@ ATTR_TO_X509_ATTR = {
     'altIP': x509.IPAddress,
 }
 
+# This is a list of tuples because NameOID can't be a key in
+# a dictionary
+OID_TO_RN = [
+    (NameOID.__dict__[oid], underscore_to_camel_case(oid)) for oid in NameOID.__dict__ if not oid.startswith('__')
+]
+
 ATTR_TO_OID = {
-    'Country': NameOID.COUNTRY_NAME,
-    'State': NameOID.STATE_OR_PROVINCE_NAME,
-    'Organization': NameOID.ORGANIZATION_NAME,
-    'OrganizationUnit': NameOID.ORGANIZATIONAL_UNIT_NAME,
-    'CommonName': NameOID.COMMON_NAME,
-    'E-Mail': NameOID.EMAIL_ADDRESS,
-    'BusinessCategory': NameOID.BUSINESS_CATEGORY,
+    name: oid for oid, name in OID_TO_RN
 }
 
 ENCODING_TYPES = {
