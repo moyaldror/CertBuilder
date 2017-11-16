@@ -152,7 +152,7 @@ for j in range(1, args.number_of_ca_branches + 1):
     signing_cert = ca_cert
 
     for i in range(1, args.depth + 1):
-        params = copy.deepcopy(CertsDefaults.INTERMIDIATE_CA_CERTS_DEFAULTS)
+        params = copy.deepcopy(CertsDefaults.INTERM_CERTS_DEFAULTS)
         cert_name_postfix = "_{}".format(i) if args.number_of_ca_branches == 1 else "_{}_{}".format(j, i)
         params['subjName']['CommonName'] = params['subjName']['CommonName'] + cert_name_postfix
         inter_cert = create_interm_ca(cert_name_postfix=cert_name_postfix, signing_cert=signing_cert)
