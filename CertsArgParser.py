@@ -10,7 +10,7 @@ def non_negative_int(value):
     try:
         int_val = int(value)
         if int_val < 0:
-            raise argparse.ArgumentTypeError("Negative values are forbidden")
+            raise argparse.ArgumentTypeError('Negative values are forbidden')
 
         return int_val
     except Exception as e:
@@ -19,8 +19,8 @@ def non_negative_int(value):
 
 class CertsArgParser:
     def __init__(self):
-        self.parser = argparse.ArgumentParser(prog="CertsBuilder",
-                                              epilog="Created By: Dror Moyal - Radware AX Group",
+        self.parser = argparse.ArgumentParser(prog='CertsBuilder',
+                                              epilog='Created By: Dror Moyal - Radware AX Group',
                                               description='A Human way to create certificates, keys, chains and more',
                                               formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         self.parser.add_argument('--version', action='version',
@@ -37,8 +37,8 @@ class CertsArgParser:
         self.parser.add_argument('--key_type', default='rsa', action='store', dest='key_type', choices=['rsa', 'ec'],
                                  help='Key type used to create the certificates')
         self.parser.add_argument('--days', default=365 * 10, type=int, action='store', dest='validity_days',
-                                 help='Number of days the certificate will be valid for."'
-                                      '"You can also use negative numbers')
+                                 help='Number of days the certificate will be valid for.'
+                                      'You can also use negative numbers')
         self.parser.add_argument('--key_size', default=2048, type=int, action='store', dest='key_size',
                                  choices=[512, 1024, 2048, 4096, 8192, 16384],
                                  help='Key size used for RSA keys')
