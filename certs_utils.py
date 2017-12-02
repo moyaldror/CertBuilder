@@ -1,6 +1,6 @@
 import json
 import os
-from CertsMaps import ENCODING_TYPES
+from certs_maps import ENCODING_TYPES
 
 CERTS_DEFAULTS_CONFIG_FILE = 'certs_defaults.cnf'
 

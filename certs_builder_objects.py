@@ -3,11 +3,10 @@ from datetime import timedelta
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
-from CertsMaps import (OID_TO_RN, ATTR_TO_OID, ATTR_TO_X509_ATTR,
-                       ATTR_TO_X509_OBJ, HASH_ALG_MAP, KEY_DEFAULTS)
-from CertsUtils import CertsDefaults
-from CertsUtils import Decorators
-import CertsBuilderConstants
+from certs_maps import (OID_TO_RN, ATTR_TO_OID, ATTR_TO_X509_ATTR,
+                        ATTR_TO_X509_OBJ, HASH_ALG_MAP, KEY_DEFAULTS)
+from certs_utils import CertsDefaults, Decorators
+import certs_builder_constants
 import ipaddress
 import math
 
@@ -56,11 +55,11 @@ class Cert:
 
     @property
     def not_before(self):
-        return self._not_before.strftime(CertsBuilderConstants.OPENSSL_TIME_FORMAT)
+        return self._not_before.strftime(certs_builder_constants.OPENSSL_TIME_FORMAT)
 
     @property
     def not_after(self):
-        return self._not_after.strftime(CertsBuilderConstants.OPENSSL_TIME_FORMAT)
+        return self._not_after.strftime(certs_builder_constants.OPENSSL_TIME_FORMAT)
 
     @property
     def validity_days(self):
@@ -140,7 +139,7 @@ class RevokedCert:
     def __init__(self, revoked_cert=None, cert=None):
         if revoked_cert is None or cert is None:
             raise ValueError("RevokedCert constructor must get both x509 revoked certificate and a valid Cert object")
-        self.revocation_date = revoked_cert.revocation_date.strftime(CertsBuilderConstants.OPENSSL_TIME_FORMAT)
+        self.revocation_date = revoked_cert.revocation_date.strftime(certs_builder_constants.OPENSSL_TIME_FORMAT)
         self.expiration_date = cert.not_after
         self.serial_number = cert.serial_number
         self.cert = cert

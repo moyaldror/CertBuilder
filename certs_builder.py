@@ -1,15 +1,16 @@
-import copy
-import pathlib
-from CertsArgParser import CertsArgParser
-from CertsBuilderObjects import Cert, CaCert, CRL, CertHelpers
-from CertsMaps import EC_CURVE_MAP, KEY_DEFAULTS
-from CertsUtils import CertsDefaults
-import os
-import sys
-
+from certs_arg_parser import CertsArgParser
 
 parser = CertsArgParser()
 args = parser.parse_args()
+
+from certs_builder_objects import Cert, CaCert, CRL, CertHelpers
+from certs_maps import EC_CURVE_MAP, KEY_DEFAULTS
+from certs_utils import CertsDefaults
+import os
+import sys
+import copy
+import pathlib
+
 
 # prepare key params
 key_params = KEY_DEFAULTS[args.key_type]
@@ -22,28 +23,28 @@ else:
 try:
     pathlib.Path(args.path_to_create).mkdir(parents=True, exist_ok=False)
 except FileExistsError as fe:
-    print("Directory {}{}{} already exist, please remove it or change destination folder"
+    print('Directory {}{}{} already exist, please remove it or change destination folder'
           .format(os.getcwd(), os.sep, args.path_to_create))
     sys.exit(1)
 
 
 class FileUtils(object):
     @staticmethod
-    def save_to_file(file_name="", data=None, file_ext=None, file_mode='w', permissions=0o777):
+    def save_to_file(file_name='', data=None, file_ext=None, file_mode='w', permissions=0o777):
         if not file_name or not data or not file_ext:
-            raise AttributeError("Parameter is missing")
+            raise AttributeError('Parameter is missing')
         try:
-            full_file_path = "{}.{}".format(args.path_to_create + file_name, file_ext)
+            full_file_path = '{}.{}'.format(args.path_to_create + file_name, file_ext)
             with open(full_file_path, file_mode) as f:
                 f.write(data)
             os.chmod(full_file_path, permissions)
         except IOError:
-            print("Could not write file:", file_name)
+            print('Could not write file:', file_name)
         except OSError:
-            print("Os error", OSError)
+            print('Os error', OSError)
 
     @staticmethod
-    def rename_file(src_file_name="", dest_file_name=""):
+    def rename_file(src_file_name='', dest_file_name=''):
         try:
             os.rename(src_file_name, dest_file_name)
         except OSError:
