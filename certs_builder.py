@@ -196,11 +196,9 @@ if args.number_of_revoked_certs > 0:
     # if user choose to revoke certificates, by default we will also create CLR and OCSP
     # files
     for j in range(1, len(end_interm_certs) + 1):
-        serials_to_revoke = []
-
         # we will use the intermediate to sign the crl
         signing_cert = end_interm_certs[j - 1]
-        serials_to_revoke.append(*revoke_certificates(parent_cert=signing_cert))
+        serials_to_revoke = revoke_certificates(parent_cert=signing_cert)
 
         create_ocsp(ca_branch_index=j, crl=create_crl(ca_branch_index=j,
                                                       signing_cert=signing_cert, serials_to_revoke=serials_to_revoke))
