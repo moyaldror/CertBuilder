@@ -30,7 +30,7 @@ root_ca_certs_defaults = {
     },
     'basicConstraints': {
         'ca': True,
-        'path_length': 0
+        'path_length': None
     }
 }
 interm_certs_defaults = {
