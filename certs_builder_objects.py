@@ -161,9 +161,7 @@ class CRL:
         self._hash = signing_cert.hash
         self.issuer_name = signing_cert.subj_name
         self._builder = (x509.CertificateRevocationListBuilder()
-                         .issuer_name(self.issuer_name)
-                         .last_update(self.last_update)
-                         .next_update(self.next_update))
+                         .issuer_name(self.issuer_name))
         self._certs = {}
         self._crl = None
 
@@ -187,6 +185,7 @@ class CRL:
         self._builder = self._builder.add_revoked_certificate(self._certs[serial_number].revoked_cert)
 
     def sign_crl(self):
+        self._builder = self._builder.last_update(self.last_update).next_update(self.next_update)
         self._crl = self._builder.sign(self._key, self._hash, default_backend())
 
     @Decorators.force_allowed_values_only(allowed_values=['PEM', 'DER'], keyword_name='encoding',
