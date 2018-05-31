@@ -40,6 +40,11 @@ class Cert:
         self._parent = signing_cert
         if signing_cert:
             signing_cert.children.append(self)
+            self._auth_key_id = x509.AuthorityKeyIdentifier.from_issuer_public_key(signing_cert.key.public_key())
+        else:
+            self._auth_key_id = x509.AuthorityKeyIdentifier.from_issuer_public_key(self.key.public_key())
+
+        self._subj_key_id = x509.SubjectKeyIdentifier.from_public_key(self._key.public_key())
 
     @property
     def key(self):
@@ -90,6 +95,8 @@ class Cert:
                 .not_valid_after(self._not_after)
                 .add_extension(self.basic_constraints, False)
                 .add_extension(self.alt_subj_name, False)
+                .add_extension(self._auth_key_id, False)
+                .add_extension(self._subj_key_id, False)
                 .sign(self._signing_key, self.hash, default_backend())
         )
 
