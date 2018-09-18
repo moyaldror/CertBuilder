@@ -51,7 +51,7 @@ def write_cert_defaults_to_file():
         with open(CERTS_DEFAULTS_CONFIG_FILE, 'w') as defaults_file:
             json.dump({'config': config}, defaults_file, indent=2)
     except Exception as e:
-        print("Failed to write default certificate parameters to file with error: {}".format(e))
+        print('Failed to write default certificate parameters to file with error: {}'.format(e))
 
 
 def load_cert_defaults_from_file():
@@ -62,8 +62,8 @@ def load_cert_defaults_from_file():
         return data['config']
 
     except Exception as e:
-        print("Failed to open default file with error: {}.{}"
-              "Using hard coded default values".format(e, os.linesep))
+        print('Failed to open default file with error: {}.{}'
+              'Using hard coded default values'.format(e, os.linesep))
         write_cert_defaults_to_file()
         return config
 
@@ -85,7 +85,7 @@ class CertsDefaults(object):
 
 class Decorators(object):
     @staticmethod
-    def force_allowed_values_only(allowed_values=None, keyword_name="", error_msg=""):
+    def force_allowed_values_only(allowed_values=None, keyword_name='', error_msg=''):
         """
         :param allowed_values: iterable containing all allowed values
         :param keyword_name: the keyword parameter name we want to check
@@ -100,7 +100,7 @@ class Decorators(object):
         def decorator(func):
             def decorated(*args, **kwargs):
                 if kwargs[keyword_name] not in allowed_values:
-                    raise ValueError("{} ({})".format(error_msg, kwargs[keyword_name]))
+                    raise ValueError('{} ({})'.format(error_msg, kwargs[keyword_name]))
                 return func(*args, **kwargs)
             return decorated
         return decorator

@@ -51,11 +51,11 @@ class FileUtils(object):
             try:
                 os.replace(src_file_name, dest_file_name)
             except OSError:
-                print("Failed to create file {}".format(dest_file_name))
+                print('Failed to create file {}'.format(dest_file_name))
 
 
 def create_root_ca():
-    print("Creating Root CA")
+    print('Creating Root CA')
 
     ca = CaCert(key_params=key_params, is_root=True)
     ca.hash = args.hash_alg
@@ -68,8 +68,8 @@ def create_root_ca():
     return ca
 
 
-def create_interm_ca(cert_name_postfix="", signing_cert=None):
-    print("Creating Intermediate CA #" + cert_name_postfix)
+def create_interm_ca(cert_name_postfix='', signing_cert=None):
+    print('Creating Intermediate CA #' + cert_name_postfix)
 
     inter_cert = CaCert(key_params=key_params, cert_params=params, signing_cert=signing_cert)
     inter_cert.hash = args.hash_alg
@@ -82,8 +82,8 @@ def create_interm_ca(cert_name_postfix="", signing_cert=None):
     return inter_cert
 
 
-def create_cert(cert_name_postfix="", signing_cert=None):
-    print("Creating Certificate #" + cert_name_postfix)
+def create_cert(cert_name_postfix='', signing_cert=None):
+    print('Creating Certificate #' + cert_name_postfix)
 
     cert = Cert(key_params=key_params, cert_params=params, signing_cert=signing_cert)
     cert.hash = args.hash_alg
@@ -101,17 +101,17 @@ def revoke_certificates(parent_cert=None):
 
     for i in range(0, args.number_of_revoked_certs):
         server_certs = parent_cert.children
-        print("Revoking Cert {}".format(server_certs[i].file_name))
+        print('Revoking Cert {}'.format(server_certs[i].file_name))
         serials_to_revoke.append(server_certs[i].serial_number)
         full_file_path = args.path_to_create + server_certs[i].file_name
-        FileUtils.rename_file(full_file_path + ".crt", full_file_path + "_revoked.crt")
-        server_certs[i].file_name = server_certs[i].file_name + "_revoked"
+        FileUtils.rename_file(full_file_path + '.crt', full_file_path + '_revoked.crt')
+        server_certs[i].file_name = server_certs[i].file_name + '_revoked'
 
     return serials_to_revoke
 
 
 def create_crl(ca_branch_index=0, signing_cert=None, serials_to_revoke=None):
-    print("Creating Crl #{} file".format(ca_branch_index))
+    print('Creating Crl #{} file'.format(ca_branch_index))
     crl = CRL(signing_cert=signing_cert)
     crl.validity_days = args.validity_days
 
@@ -123,7 +123,7 @@ def create_crl(ca_branch_index=0, signing_cert=None, serials_to_revoke=None):
 
     crl.sign_crl()
 
-    crl_name = "crl_{}".format(ca_branch_index) if end_interm_certs else "crl"
+    crl_name = 'crl_{}'.format(ca_branch_index) if end_interm_certs else 'crl'
 
     FileUtils.save_to_file(file_name=crl_name,
                            data=crl.get_crl(encoding='PEM').decode('UTF-8'), file_ext='pem')
@@ -132,8 +132,8 @@ def create_crl(ca_branch_index=0, signing_cert=None, serials_to_revoke=None):
 
 
 def create_ocsp(ca_branch_index=0, crl=None):
-    index_name = "index_{}".format(ca_branch_index) if end_interm_certs else "index"
-    script_name = "run_ocsp_{}".format(ca_branch_index) if end_interm_certs else "run_ocsp"
+    index_name = 'index_{}'.format(ca_branch_index) if end_interm_certs else 'index'
+    script_name = 'run_ocsp_{}'.format(ca_branch_index) if end_interm_certs else 'run_ocsp'
 
     FileUtils.save_to_file(file_name=script_name,
                            data=crl.get_ocsp_script(index_file_name=index_name + '.txt'), file_ext='sh')
@@ -149,13 +149,12 @@ ca_cert = create_root_ca()
 
 for j in range(1, args.number_of_ca_branches + 1):
     # same root ca sign's all high level intermediates
-    # noinspection PyRedeclaration
     signing_cert = ca_cert
 
     for i in range(1, args.depth + 1):
         params = copy.deepcopy(CertsDefaults.INTERM_CERTS_DEFAULTS)
-        cert_name_postfix = "_{}".format(i) if args.number_of_ca_branches == 1 else "_{}_{}".format(j, i)
-        params['subjName']['CommonName'] = params['subjName']['CommonName'] + cert_name_postfix
+        cert_name_postfix = '_{}'.format(i) if args.number_of_ca_branches == 1 else '_{}_{}'.format(j, i)
+        params['subjName']['CommonName'] = params['subjName'].get('CommonName', u'TestIntermCert') + cert_name_postfix
         inter_cert = create_interm_ca(cert_name_postfix=cert_name_postfix, signing_cert=signing_cert)
 
         # the intermediate that was just created will be used to sign the next leaf
@@ -174,8 +173,8 @@ for j in range(1, len(end_interm_certs) + 1):
 
     for i in range(1, args.number_of_certs + 1):
         params = copy.deepcopy(CertsDefaults.CERTS_DEFAULTS)
-        cert_name_postfix = "_{}".format(i) if len(end_interm_certs) == 0 else "_{}_{}".format(j, i)
-        params['subjName']['CommonName'] = params['subjName']['CommonName'] + cert_name_postfix
+        cert_name_postfix = '_{}'.format(i) if len(end_interm_certs) == 0 else '_{}_{}'.format(j, i)
+        params['subjName']['CommonName'] = params['subjName'].get('CommonName', u'TestCert') + cert_name_postfix
 
         # we save all end entities in the same list so that in case export_chain is on we will get the
         # chain from each certificate
@@ -186,9 +185,9 @@ if args.export_chain:
     # for each end entity we will call the chain generator that recursively
     # returns the chain, from end entity to the root
     for cert in server_certs:
-        print("Creating Cert #{} chain file".format(cert.file_name))
+        print('Creating Cert #{} chain file'.format(cert.file_name))
         for cert_link in CertHelpers.gen_cert_chain(cert):
-            FileUtils.save_to_file(file_name=cert.file_name + "_chain",
+            FileUtils.save_to_file(file_name=cert.file_name + '_chain',
                                    data=cert_link, file_ext='crt', file_mode='a+')
 
 
@@ -205,9 +204,9 @@ if args.number_of_revoked_certs > 0:
 
 
 # create ascii art representation of our CA store
-FileUtils.save_to_file(file_name="cert_store_structure",
+FileUtils.save_to_file(file_name='cert_store_structure',
                        data=CertHelpers.get_cert_tree(ca_cert, 0), file_ext='txt')
 
 
-print("\nDone!!!\n\nAll files can be found in {}".format(os.getcwd() + os.sep + args.path_to_create))
+print('\nDone!!!\n\nAll files can be found in {}'.format(os.getcwd() + os.sep + args.path_to_create))
 

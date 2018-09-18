@@ -16,7 +16,7 @@ class Cert:
         self._key = key_params['type'].generate_private_key(**key_params['params'])
         self._signing_key = self._key if signing_cert is None else signing_cert.key
         self.serial_number = x509.random_serial_number()
-        self.file_name = "{}".format(cert_params['subjName']['CommonName'])
+        self.file_name = '{}'.format(cert_params['subjName']['CommonName'])
         self.basic_constraints = ATTR_TO_X509_OBJ['basicConstraints'](**cert_params['basicConstraints'])
         self.cert_extensions = self.basic_constraints
         self._not_before = datetime.utcnow()
@@ -24,12 +24,13 @@ class Cert:
         self._cert = None
         self._hash = None
 
-        self.alt_subj_name = ATTR_TO_X509_OBJ['altSubjName'](
-            [ATTR_TO_X509_ATTR[alt_name.split('.')[0]]
-                (cert_params['altSubjName'][alt_name]
-                    if alt_name.split('.')[0] == 'altDNS'
-                    else ipaddress.ip_address(cert_params['altSubjName'][alt_name]))
-                for alt_name in cert_params['altSubjName'].keys()])
+        alt_names = [ATTR_TO_X509_ATTR[alt_name.split('.')[0]]
+            (cert_params['altSubjName'][alt_name]
+                if alt_name.split('.')[0] == 'altDNS' else ipaddress.ip_address(cert_params['altSubjName'][alt_name]))
+                for alt_name in cert_params['altSubjName'].keys()]
+        if 'CommonName' in cert_params['subjName']:
+            alt_names.insert(0, ATTR_TO_X509_ATTR['altDNS'](cert_params['subjName']['CommonName']))
+        self.alt_subj_name = ATTR_TO_X509_OBJ['altSubjName'](alt_names)
 
         self.subj_name = ATTR_TO_X509_OBJ['subjName'](
             [ATTR_TO_X509_ATTR['name'](ATTR_TO_OID[cert_attr], cert_params['subjName'][cert_attr])
@@ -124,16 +125,18 @@ class Cert:
         for comp in self.subj_name:
             for oid, oid_name in OID_TO_RN:
                 if oid == comp.oid:
-                    str_rep.append("/{}={}".format(oid_name, self.subj_name.get_attributes_for_oid(oid)[0].value))
+                    str_rep.append('/{}={}'.format(oid_name, self.subj_name.get_attributes_for_oid(oid)[0].value))
                     break
-        return "".join(str_rep)
+        return ''.join(str_rep)
 
 
 class CaCert(Cert):
     def __init__(self, key_params=KEY_DEFAULTS['rsa'], cert_params=CertsDefaults.ROOT_CA_CERTS_DEFAULTS,
                  signing_cert=None, is_root=False):
+        if is_root and 'CommonName' not in cert_params['subjName']:
+            raise ValueError('Root certificate must have commong name')
         if is_root and signing_cert:
-            raise ValueError("Root certificate is self signed. Passing a Signing Certificate is an error")
+            raise ValueError('Root certificate is self signed. Passing a Signing Certificate is an error')
         self._is_root = is_root
         Cert.__init__(self, key_params=key_params, cert_params=cert_params, signing_cert=signing_cert)
 
@@ -145,7 +148,7 @@ class CaCert(Cert):
 class RevokedCert:
     def __init__(self, revoked_cert=None, cert=None):
         if revoked_cert is None or cert is None:
-            raise ValueError("RevokedCert constructor must get both x509 revoked certificate and a valid Cert object")
+            raise ValueError('RevokedCert constructor must get both x509 revoked certificate and a valid Cert object')
         self.revocation_date = revoked_cert.revocation_date.strftime(certs_builder_constants.OPENSSL_TIME_FORMAT)
         self.expiration_date = cert.not_after
         self.serial_number = cert.serial_number
@@ -159,10 +162,10 @@ class RevokedCert:
 class CRL:
     def __init__(self, signing_cert=None):
         if signing_cert is None:
-            raise ValueError("CRL Must have get a signing certificate")
+            raise ValueError('CRL Must have get a signing certificate')
         self._key = signing_cert.key
         self.signer_file_name = signing_cert.file_name
-        self.file_name = "{}_CRL".format(signing_cert.subj_name)
+        self.file_name = '{}_CRL'.format(signing_cert.subj_name)
         self.last_update = datetime.utcnow()
         self.next_update = self.last_update
         self._hash = signing_cert.hash
@@ -210,16 +213,16 @@ class CRL:
         index file should contains lines in the following format:
             [V/R] [expiration time] [revocation time] [serial] [cert file name] [subject name]
         """
-        line_format = "{}\t{}\t{}\t{:X}\tunknown\t{}\n"
+        line_format = '{}\t{}\t{}\t{:X}\tunknown\t{}\n'
         for cert in self._certs.values():
             status, revocation_date, expiration_date = (
                 ('R', cert.revocation_date, cert.expiration_date) if isinstance(cert, RevokedCert)
                 else ('V', '', cert.not_after))
             yield line_format.format(status, expiration_date, revocation_date, cert.serial_number, str(cert))
 
-    def get_ocsp_script(self, index_file_name="index.txt"):
-        ocsp_str_format = "openssl ocsp  -index ./{0} -port {1} -text -rsigner ./{2} -rkey ./{2} -CA ./{2}"
-        return ocsp_str_format.format(index_file_name, 9999, self.signer_file_name + ".crt")
+    def get_ocsp_script(self, index_file_name='index.txt'):
+        ocsp_str_format = 'openssl ocsp  -index ./{0} -port {1} -text -rsigner ./{2} -rkey ./{2} -CA ./{2}'
+        return ocsp_str_format.format(index_file_name, 9999, self.signer_file_name + '.crt')
 
 
 class CertHelpers:
@@ -244,16 +247,16 @@ class CertHelpers:
     def get_cert_tree(cert, indent):
         tree_str = []
         if len(cert.children):
-            tree_str.append("{}\n".format(cert.file_name) if type(cert) is CaCert and cert.is_root
-                            else "|{}{}-> {}\n".format(" " * (indent - CertHelpers.indent_multiplier),
-                                                       "-" * CertHelpers.indent_multiplier, cert.file_name))
-            tree_str.append("|{}{}\n".format(" " * indent, '|' if indent != 0 else ''))
+            tree_str.append('{}\n'.format(cert.file_name) if type(cert) is CaCert and cert.is_root
+                            else '|{}{}-> {}\n'.format(' ' * (indent - CertHelpers.indent_multiplier),
+                                                       '-' * CertHelpers.indent_multiplier, cert.file_name))
+            tree_str.append('|{}{}\n'.format(' ' * indent, '|' if indent != 0 else ''))
             for child_cert in cert.children:
                 tree_str.append(CertHelpers.get_cert_tree(child_cert, indent+CertHelpers.indent_multiplier))
         else:
-            tree_str.append("{}\n".format(cert.file_name) if type(cert) is CaCert and cert.is_root
-                            else "|{}{}-> {}\n".format(" " * (indent - CertHelpers.indent_multiplier),
-                                                       "-" * CertHelpers.indent_multiplier, cert.file_name))
+            tree_str.append('{}\n'.format(cert.file_name) if type(cert) is CaCert and cert.is_root
+                            else '|{}{}-> {}\n'.format(' ' * (indent - CertHelpers.indent_multiplier),
+                                                       '-' * CertHelpers.indent_multiplier, cert.file_name))
 
-        return "".join(tree_str)
+        return ''.join(tree_str)
 
