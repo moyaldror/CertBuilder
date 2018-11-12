@@ -20,11 +20,11 @@ def non_negative_int(value):
 class CertsArgParser:
     def __init__(self):
         self.parser = argparse.ArgumentParser(prog='CertsBuilder',
-                                              epilog='Created By: Dror Moyal - Radware AX Group',
+                                              epilog='Created By: Dror Moyal',
                                               description='A Human way to create certificates, keys, chains and more',
                                               formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         self.parser.add_argument('--version', action='version',
-                                 version='%(prog)s {}, Written By: Dror Moyal 2017'
+                                 version='%(prog)s {}, Created By: Dror Moyal'
                                  .format(certs_builder_constants.VERSION))
         self.parser.add_argument('--certs_dir', default='certs' + os.sep, action='store', dest='path_to_create',
                                  help='Path to the put the certificates in')
